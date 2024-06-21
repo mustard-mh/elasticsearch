@@ -2,9 +2,23 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - init: ./gradlew localDistro
+- name: Init cluster workspace
+  before: |
+    mkdir -p /workspace/.gradle
+    printf "org.gradle.jvmargs=-Xmx6g\norg.gradle.daemon=true\n" > /workspace/.gradle/gradle.properties
+  # init: |
+  #   ./gradlew compileAll -PfetchGwt
+  #   ./gradlew ideImport
+  #   cd ui/angular/angular.server && yarn install; cd -
+  init: |
+    ./gradlew compileAll localDistro
 
 jetbrains:
   intellij:
+    vmoptions: '-Xmx8g'
     prebuilds:
       version: stable
+    plugins:
+      - CheckStyle-IDEA
+      - intellij.prettierJS
+      - org.sonarlint.idea
