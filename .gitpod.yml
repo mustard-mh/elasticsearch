@@ -1,8 +1,8 @@
 image:
   file: .gitpod.Dockerfile
 
-tasks:
-  - init: ./gradlew localDistro
+#tasks:
+#  - init: ./gradlew localDistro
 
 jetbrains:
   intellij:
