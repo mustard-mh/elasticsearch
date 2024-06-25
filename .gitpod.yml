@@ -11,6 +11,7 @@ tasks:
   #   ./gradlew ideImport
   #   cd ui/angular/angular.server && yarn install; cd -
   init: |
+    if [[ "$GITPOD_HEADLESS" != "true" ]]; then echo "No prebuild, skipping init task."; fi
     ./gradlew compileAll localDistro
 
 jetbrains:
