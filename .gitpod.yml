@@ -1,5 +1,5 @@
-image:
-  file: .gitpod.Dockerfile
+image: test:latest
+  # file: .gitpod.Dockerfile
 
 tasks:
 - name: Init cluster workspace
@@ -24,3 +24,4 @@ jetbrains:
       - intellij.prettierJS
       - org.sonarlint.idea
       - EclipseCodeFormatter
+      - com.jetbrains.performancePlugin.yourkit
