@@ -22,6 +22,6 @@ jetbrains:
     plugins:
       - CheckStyle-IDEA
       - intellij.prettierJS
-      - org.sonarlint.idea
+      #- org.sonarlint.idea
       - EclipseCodeFormatter
       - com.jetbrains.performancePlugin.yourkit
