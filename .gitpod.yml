@@ -16,7 +16,7 @@ tasks:
 
 jetbrains:
   intellij:
-    vmoptions: '-Xmx8g'
+    vmoptions: '-Xmx8g -Dgitpod.forceUpdateMavenProjects.disabled=true'
     prebuilds:
       version: stable
     plugins:
