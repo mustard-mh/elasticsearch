@@ -17,7 +17,13 @@ RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.
     unzip -d /opt/gradle /tmp/gradle-${GRADLE_VERSION}-bin.zip && \
     ln -s /opt/gradle/gradle-${GRADLE_VERSION}/bin/gradle /usr/bin/gradle
 
+USER gitpod
+
 # Ensure that Gradle saves all files in /workspace, because files outside that folder are not being backed up when a prebuild finishes or a workspace stops. 
 ENV GRADLE_USER_HOME=/workspace/.gradle/
 
-USER gitpod
+# Ensure that Maven dependencies are saved in /workspace, because files outside that folder are not being backed up when a prebuild finishes or a workspace stops. 
+RUN mkdir /home/gitpod/.m2 && \
+    printf '<settings>\n  <localRepository>/workspace/m2-repository/</localRepository>\n</settings>\n' > /home/gitpod/.m2/settings.xml
+
+
