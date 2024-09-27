@@ -1,10 +1,21 @@
+
 image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - init: ./gradlew localDistro
+  - init: |
+      # force non-interactive terminal
+      export TERM=
+
+      # run standard gradle build
+      ./gradlew localDistro
 
 jetbrains:
   intellij:
     prebuilds:
       version: stable
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
+    - eamodio.gitlens
