@@ -2,6 +2,24 @@
 
 This README documents best practices around using Gradle in Gitpod. For the orignal Elasticseatch readme, see [README-es](README-es.asciidoc). 
 
+## Enabling Prebuilds for Gradle and IntelliJ
+
+Gradle may take some time to build your project. IntelliJ may take some time to index your project. To not wait for either, you may want to run Gradle and "IntelliJ warmup" in Gitpod's prebuild. Do do so: 
+1. Create "Repository Settings" for you repo in Gitpod and enable prebuild. 
+2. Run Gradle as `init` task and enabled intellij prebuilds via `.gitpod.yaml`:
+```
+tasks:
+  - init: |
+      ./gradlew build
+
+jetbrains:
+  intellij:
+    prebuilds:
+      version: stable
+```
+
+While this generally enables prebuilds, please read the following sections of this document to ensure everything runs smoothly.
+
 ## Ensure files worth persisting are stored in `/workspace`
 
 Context: Gitpod backs up all files from `/workspace` when a workspace stops or when a prebuild finishes. Files outside this directly are not persisted. This affects Gradle, because, by default, Gradle persists files (e.g. downloaded dependencies) outside `/workspace`.
@@ -69,3 +87,43 @@ tasks:
 See [here](https://github.com/gitpod-io/elasticsearch/blob/6c7bcda591b555c4a320a05dc92c79ee35e377bb/.gitpod.yml#L5) for full example.
 
 
+## Troubleshooting: Gradle Build Scans
+
+Sometimes the log output of Gradle is not enough to understand what really happend. This is particualrly true when Gradle is being invoked automatically, for example from a Gitpod prebuild or from IntelliJ during sync or warmup. 
+
+Gradle build scans provide a trove of insights: Gradle will upload a detailed report of the build to gradle.com and provide you with a URL to inspect the repos. yes, you'll need to accept Gradle's ToS to give permission to upload the report to gradle.com. Giving permission is usually an interactive process, but with the following confuguration you can enabled build scans by default, so that you'll get scans for prebuilds and IntelliJ warmups:
+
+```
+gradleEnterprise {
+    buildScan {
+        // Accept the terms of service automatically
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+        // Always publish a build scan without requiring --scan
+        publishAlways()
+    }
+}
+```
+
+See [here](https://github.com/gitpod-io/elasticsearch/commit/953e56abb4d44496264cb0e0dff747a0b896cbdb) for the full example.
+
+## Troubleshooting: Timeouts
+
+Unfortunately, we've had cases in which the IntelliJ warmup process never finished and thus the Gitpod prebuild timed out after one hour. 
+Here are scripts to troubleshoot this situation:
+* [tracer.sh](https://github.com/gitpod-io/elasticsearch/blob/tracing/tracer.sh): Dump Java Stack traces and Linux Process Tree. This helps to understand what process Gitpod waits for, and, if it's a Java process, what the process is doing.
+* [record.sh](https://github.com/gitpod-io/elasticsearch/blob/tracing/record.sh): Automatically run Java Flight Recorder on JVM processes.
+* [timeout.sh](https://github.com/gitpod-io/elasticsearch/blob/tracing/timeout.sh): Terminate processes at a defined timepout to avoid running into the Prebuild timeout.
+
+See [this example](https://github.com/gitpod-io/elasticsearch/blob/c833b5f7d27ca71921c87881b00e408deea93cc3/.gitpod.yml#L6-L12) on how to add the scripts to your `.gitpod.yaml`:
+```
+# configure Gradle and start tracing scripts
+mkdir -p /workspace/.gradle
+printf "org.gradle.jvmargs=-Xmx6g\norg.gradle.daemon=true\norg.gradle.parallel=true\n" > /workspace/.gradle/gradle.properties
+mkdir -p /workspace/jvm_debug
+nohup ./tracer.sh > /workspace/jvm_debug/tracer.log 2>&1 &
+nohup ./record.sh > /workspace/jvm_debug/record.log 2>&1 &
+nohup ./timeout.sh> /workspace/jvm_debug/timeout.log 2>&1 &
+```
+
+Once a prebuild has finished, we should be able to open a “debug workspace” on the prebuild and find detailed tracing in /workspace/jvm_debug/.
