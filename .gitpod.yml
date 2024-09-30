@@ -1,11 +1,12 @@
-
 image:
   file: .gitpod.Dockerfile
 
 tasks:
   - init: |
-      # force non-interactive terminal
-      export TERM=
+      if [ "$GITPOD_HEADLESS" = "true" ]; then
+        # force non-interactive terminal in prebuilds
+        export TERM=dumb
+      fi
 
       # run standard gradle build
       ./gradlew localDistro
