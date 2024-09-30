@@ -4,6 +4,11 @@ FROM gitpod/workspace-base
 
 USER root
 
+# install xmlstarlet. We'll use this to edit the IntelliJ config from CLI
+RUN apt-get update && apt-get install -yq \
+    xmlstarlet \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
+
 # Install Java 21 (openjdk-21-jdk)
 RUN wget -O- https://apt.corretto.aws/corretto.key | gpg --dearmor | tee /usr/share/keyrings/amazon-corretto-archive-keyring.gpg > /dev/null && \
     echo 'deb [signed-by=/usr/share/keyrings/amazon-corretto-archive-keyring.gpg] https://apt.corretto.aws stable main' | tee /etc/apt/sources.list.d/corretto.list && \
@@ -19,10 +24,10 @@ RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.
 
 USER gitpod
 
-# Ensure that Gradle saves all files in /workspace, because files outside that folder are not being backed up when a prebuild finishes or a workspace stops. 
+# Ensure that Gradle saves all files in /workspace, because files outside that folder are not being backed up when a prebuild finishes or a workspace stops.
 ENV GRADLE_USER_HOME=/workspace/.gradle/
 
-# Ensure that Maven dependencies are saved in /workspace, because files outside that folder are not being backed up when a prebuild finishes or a workspace stops. 
+# Ensure that Maven dependencies are saved in /workspace, because files outside that folder are not being backed up when a prebuild finishes or a workspace stops.
 RUN mkdir /home/gitpod/.m2 && \
     printf '<settings>\n  <localRepository>/workspace/m2-repository/</localRepository>\n</settings>\n' > /home/gitpod/.m2/settings.xml
 
