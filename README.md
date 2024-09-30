@@ -1,5 +1,7 @@
 # Gradle in Gitpod: Best Practices
 
+This README documents best practices around using Gradle in Gitpod. For the orignal Elasticseatch readme, see [README-es](README-es.asciidoc). 
+
 ## Ensure files worth persisting are stored in `/workspace`
 
 Context: Gitpod backs up all files from `/workspace` when a workspace stops or when a prebuild finishes. Files outside this directly are not persisted. This affects Gradle, because, by default, Gradle persists files (e.g. downloaded dependencies) outside `/workspace`.
